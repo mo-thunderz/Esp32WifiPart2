@@ -13,10 +13,9 @@
 #include <WebServer.h> 
 #include <WebSocketsServer.h>  // Include Websocket Library
 
-#include <WifiPassword.h>
 // SSID and password of Wifi connection:
-//const char* ssid = "TYPE_YOUR_SSID_HERE";
-//const char* password = "TYPE_YOUR_PASSWORD_HERE";
+const char* ssid = "TYPE_YOUR_SSID_HERE";
+const char* password = "TYPE_YOUR_PASSWORD_HERE";
 
 String website = "<!DOCTYPE html><html><head><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Lets generate a random number</h1><p>The random number is: <span id='rand'>-</span></p><p><button type='button' id='BTN_SEND_BACK'>Send info to ESP32</button></p></span></body><script> var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_send_back() { Socket.send('Sending back some random stuff'); } function processCommand(event) { document.getElementById('rand').innerHTML = event.data; console.log(event.data); } window.onload = function(event) { init(); }</script></html>";
 
