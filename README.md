@@ -7,6 +7,9 @@ This is a simple webserver for the ESP32. Just update the SSID and Password with
 # ESP32WebserverWebsocket.ino
 Install the same way as ESP32Webserver.ino. This includes websockets for continuous updates between ESP32 and its clients.
 
+# ESP32WebserverWebsocketJson.ino
+Install the same way as ESP32Webserver.ino. This includes websockets and JSON encapsulation for exchange of multiple variables between ESP32 and its clients.
+
 # ESP32WifiBasic.ino (+included HTML file)
 If you want to code along with the youtube video, use this folder as starting point.
 
