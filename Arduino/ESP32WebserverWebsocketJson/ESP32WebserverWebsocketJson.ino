@@ -12,13 +12,13 @@
 #include <WiFi.h>
 #include <WebServer.h> 
 #include <WebSocketsServer.h>  // Include Websocket Library
-
+#include <ArduinoJson.h> // Include ArduinoJson Library
 #include <WifiPassword.h>
 // SSID and password of Wifi connection:
 //const char* ssid = "TYPE_YOUR_SSID_HERE";
 //const char* password = "TYPE_YOUR_PASSWORD_HERE";
 
-String website = "<!DOCTYPE html><html><head><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Lets generate a random number</h1><p>The random number is: <span id='rand'>-</span></p><p><button type='button' id='BTN_SEND_BACK'>Send info to ESP32</button></p></span></body><script> var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_send_back() { Socket.send('Sending back some random stuff'); } function processCommand(event) { document.getElementById('rand').innerHTML = event.data; console.log(event.data); } window.onload = function(event) { init(); }</script></html>";
+String website = "<!DOCTYPE html><html><head><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Lets generate a random number</h1><p>The first random number is: <span id='rand1'>-</span></p><p>The second random number is: <span id='rand2'>-</span></p><p><button type='button' id='BTN_SEND_BACK'>Send info to ESP32</button></p></span></body><script> var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_send_back() { var msg = {brand: 'Gibson',type: 'Les Paul Studio',year: 2010,color: 'white'};Socket.send(JSON.stringify(msg)); } function processCommand(event) {var obj = JSON.parse(event.data);document.getElementById('rand1').innerHTML = obj.rand1;document.getElementById('rand2').innerHTML = obj.rand2; console.log(obj.rand1);console.log(obj.rand2); } window.onload = function(event) { init(); }</script></html>";
 
 int randomval = random(100);
 int interval = 1000; 
@@ -55,11 +55,14 @@ void loop() {
   
   unsigned long currentMillis = millis(); // call millis  and Get snapshot of time
   if ((unsigned long)(currentMillis - previousMillis) >= interval) { // How much time has passed, accounting for rollover with subtraction!
-    String str = String(random(100)); 
-    int str_len = str.length() + 1; 
-    char char_array[str_len];
-    str.toCharArray(char_array, str_len);
-    webSocket.broadcastTXT(char_array);
+    StaticJsonDocument<200> doc;
+    String jsonString = "";
+    JsonObject object = doc.to<JsonObject>();
+    object["rand1"] = random(100);
+    object["rand2"] = random(100);
+    serializeJson(doc, jsonString); 
+    Serial.println(jsonString); 
+    webSocket.broadcastTXT(jsonString); 
     previousMillis = currentMillis;
   }
 }
@@ -75,8 +78,23 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
       
       break;
     case WStype_TEXT: // check response from client
-      for (int i=0; i<length; i++) {    
-        Serial.print((char)payload[i]);
+      StaticJsonDocument<200> doc;
+      DeserializationError error = deserializeJson(doc, payload);
+      if (error) {
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.f_str());
+        return;
+      }
+      else {
+        const char* g_brand = doc["brand"];
+        const char* g_type = doc["type"];
+        const int g_year = doc["year"];
+        const char* g_color = doc["color"];
+        Serial.println("Received guitar info!");
+        Serial.println("Brand: " + String(g_brand));
+        Serial.println("Type: " + String(g_type));
+        Serial.println("Year: " + String(g_year));
+        Serial.println("Color: " + String(g_color));
       }
       Serial.println("");
       break;

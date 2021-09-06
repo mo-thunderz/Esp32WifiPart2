@@ -8,7 +8,8 @@
 <span style='color: #003366;'>
 
 <h1>Lets generate a random number</h1>
-<p>The random number is: <span id='rand'>-</span></p>
+<p>The first random number is: <span id='rand1'>-</span></p>
+<p>The second random number is: <span id='rand2'>-</span></p>
 <p><button type='button' id='BTN_SEND_BACK'>
 Send info to ESP32
 </button></p>
@@ -26,11 +27,20 @@ Send info to ESP32
     };
   }
   function button_send_back() {
-    Socket.send('Sending back some random stuff');
+    var msg = {
+	brand: 'Gibson',
+	type: 'Les Paul Studio',
+	year:  2010,
+	color: 'white'
+	};
+	Socket.send(JSON.stringify(msg));
   }
   function processCommand(event) {
-    document.getElementById('rand').innerHTML = event.data;
-    console.log(event.data);
+	var obj = JSON.parse(event.data);
+	document.getElementById('rand1').innerHTML = obj.rand1;
+	document.getElementById('rand2').innerHTML = obj.rand2;
+    console.log(obj.rand1);
+	console.log(obj.rand2);
   }
   window.onload = function(event) {
     init();
