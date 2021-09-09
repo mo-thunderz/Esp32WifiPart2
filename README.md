@@ -14,7 +14,8 @@ Install the same way as ESP32Webserver.ino. This includes websockets and JSON en
 If you want to code along with the youtube video, use this folder as starting point.
 
 # How to use:
-Youtube video is in progress...
+Please refer to the following Youtube video:
+https://youtu.be/15X0WvGaVg8
 
 
 Have fun ;-)
