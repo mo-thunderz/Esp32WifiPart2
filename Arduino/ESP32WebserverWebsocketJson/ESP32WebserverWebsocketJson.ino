@@ -19,6 +19,8 @@ const char* ssid = "TYPE_YOUR_SSID_HERE";
 const char* password = "TYPE_YOUR_PASSWORD_HERE";
 
 String website = "<!DOCTYPE html><html><head><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Lets generate a random number</h1><p>The first random number is: <span id='rand1'>-</span></p><p>The second random number is: <span id='rand2'>-</span></p><p><button type='button' id='BTN_SEND_BACK'>Send info to ESP32</button></p></span></body><script> var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_send_back() { var msg = {brand: 'Gibson',type: 'Les Paul Studio',year: 2010,color: 'white'};Socket.send(JSON.stringify(msg)); } function processCommand(event) {var obj = JSON.parse(event.data);document.getElementById('rand1').innerHTML = obj.rand1;document.getElementById('rand2').innerHTML = obj.rand2; console.log(obj.rand1);console.log(obj.rand2); } window.onload = function(event) { init(); }</script></html>";
+StaticJsonDocument<200> doc_tx;
+StaticJsonDocument<200> doc_rx;
 
 int randomval = random(100);
 int interval = 1000; 
@@ -55,12 +57,12 @@ void loop() {
   
   unsigned long currentMillis = millis(); // call millis  and Get snapshot of time
   if ((unsigned long)(currentMillis - previousMillis) >= interval) { // How much time has passed, accounting for rollover with subtraction!
-    StaticJsonDocument<200> doc;
+    
     String jsonString = "";
-    JsonObject object = doc.to<JsonObject>();
+    JsonObject object = doc_tx.to<JsonObject>();
     object["rand1"] = random(100);
     object["rand2"] = random(100);
-    serializeJson(doc, jsonString); 
+    serializeJson(doc_tx, jsonString); 
     Serial.println(jsonString); 
     webSocket.broadcastTXT(jsonString); 
     previousMillis = currentMillis;
@@ -78,18 +80,18 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
       
       break;
     case WStype_TEXT: // check response from client
-      StaticJsonDocument<200> doc;
-      DeserializationError error = deserializeJson(doc, payload);
+      
+      DeserializationError error = deserializeJson(doc_rx, payload);
       if (error) {
         Serial.print(F("deserializeJson() failed: "));
         Serial.println(error.f_str());
         return;
       }
       else {
-        const char* g_brand = doc["brand"];
-        const char* g_type = doc["type"];
-        const int g_year = doc["year"];
-        const char* g_color = doc["color"];
+        const char* g_brand = doc_rx["brand"];
+        const char* g_type = doc_rx["type"];
+        const int g_year = doc_rx["year"];
+        const char* g_color = doc_rx["color"];
         Serial.println("Received guitar info!");
         Serial.println("Brand: " + String(g_brand));
         Serial.println("Type: " + String(g_type));
