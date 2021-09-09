@@ -3,7 +3,9 @@
 // Code setting up a simple webserver on the ESP32. 
 // device used for tests: ESP32-WROOM-32D
 //
-// Install Websockets by Markus Sattler
+// Install the following libraries:
+// Websockets by Markus Sattler
+// ArduinoJson
 //
 // Written by mo thunderz (last update: 05.09.2021)
 //
