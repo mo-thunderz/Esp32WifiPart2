@@ -48,7 +48,7 @@ void setup() {
   Serial.println(WiFi.localIP());                     // show IP address that the ESP32 has received from router
   
   server.on("/", []() {                               // define here wat the webserver needs to do
-  server.send(200, "text\html", website);             //    -> it needs to send out the HTML string "webpage" to the client
+    server.send(200, "text\html", website);           //    -> it needs to send out the HTML string "webpage" to the client
   });
   server.begin();                                     // start server
   
