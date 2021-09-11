@@ -61,7 +61,7 @@ void setup() {
 }
 
 void loop() {
-  server.handleClient();                              // Needed for teh webserver to handle all clients
+  server.handleClient();                              // Needed for the webserver to handle all clients
   webSocket.loop();                                   // Update function for the webSockets 
   
   unsigned long now = millis();                       // read out the current "time" ("millis()" gives the time in ms since the Arduino started)
