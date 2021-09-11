@@ -54,7 +54,7 @@ void setup() {
   server.on("/", []() {                               // define here wat the webserver needs to do
     server.send(200, "text\html", webpage);           //    -> it needs to send out the HTML string "webpage" to the client
   });
-  server.begin(); // init the server                  // start server
+  server.begin();                                     // start server
   
   webSocket.begin();                                  // start websocket
   webSocket.onEvent(webSocketEvent);                  // define a callback function -> what does the ESP32 need to do when an event from the websocket is received? -> run function "webSocketEvent()"
