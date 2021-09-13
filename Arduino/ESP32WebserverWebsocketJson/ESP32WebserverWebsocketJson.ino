@@ -8,6 +8,9 @@
 // * Websockets by Markus Sattler (can be tricky to find -> search for "Arduino Websockets"
 // * ArduinoJson by Benoit Blanchon
 //
+// NOTE: in principle this code is universal and can be used on Arduino AVR as well. However, AVR is only supported with version 1.3 of the webSocketsServer. Also, the Websocket
+// library will require quite a bit of memory, so wont load on Arduino UNO for instance. The ESP32 and ESP8266 are cheap and powerful, so use of this platform is recommended. 
+//
 // Refer to https://youtu.be/15X0WvGaVg8
 //
 // Written by mo thunderz (last update: 11.09.2021)
