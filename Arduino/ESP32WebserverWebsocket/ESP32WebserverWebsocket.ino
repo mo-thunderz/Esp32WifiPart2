@@ -49,6 +49,8 @@ void setup() {
   
   server.on("/", []() {                               // define here wat the webserver needs to do
     server.send(200, "text\html", website);           //    -> it needs to send out the HTML string "webpage" to the client
+    // NOTE: if you use Edge or IE, then use:
+    // server.send(200, "text/html", webpage);
   });
   server.begin();                                     // start server
   
