@@ -3,12 +3,12 @@
 // Code setting up a simple webserver on the ESP32. 
 // device used for tests: ESP32-WROOM-32D
 //
-// Written by mo thunderz (last update: 05.09.2021)
+// Written by mo thunderz (last update: 27.08.2022)
 //
 // --------------------------------------------------
 
 #include <WiFi.h>
-#include <WebServer.h> 
+#include <WebServer.h>                                // Make sure tools -> board is set to ESP32, otherwise you will get a "WebServer.h: No such file or directory" error
 
 // SSID and password of Wifi connection:
 const char* ssid = "TYPE_YOUR_SSID_HERE";
@@ -39,7 +39,7 @@ void setup() {
   
   website = website1 + String(randomval) + website2;
   server.on("/", []() {
-  server.send(200, "text\html", website);
+  server.send(200, "text/html", website);
   });
   server.begin(); // init the server
 }
