@@ -13,12 +13,12 @@
 //
 // Refer to https://youtu.be/15X0WvGaVg8
 //
-// Written by mo thunderz (last update: 11.09.2021)
+// Written by mo thunderz (last update: 27.08.2022)
 //
 // ---------------------------------------------------------------------------------------
 
 #include <WiFi.h>                                     // needed to connect to WiFi
-#include <WebServer.h>                                // needed to create a simple webserver
+#include <WebServer.h>                                // needed to create a simple webserver (make sure tools -> board is set to ESP32, otherwise you will get a "WebServer.h: No such file or directory" error)
 #include <WebSocketsServer.h>                         // needed for instant communication between client and server through Websockets
 #include <ArduinoJson.h>                              // needed for JSON encapsulation (send multiple variables with one string)
 
@@ -30,8 +30,7 @@ const char* password = "TYPE_YOUR_PASSWORD_HERE";
 String webpage = "<!DOCTYPE html><html><head><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Lets generate a random number</h1><p>The first random number is: <span id='rand1'>-</span></p><p>The second random number is: <span id='rand2'>-</span></p><p><button type='button' id='BTN_SEND_BACK'>Send info to ESP32</button></p></span></body><script> var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_send_back() { var msg = {brand: 'Gibson',type: 'Les Paul Studio',year: 2010,color: 'white'};Socket.send(JSON.stringify(msg)); } function processCommand(event) {var obj = JSON.parse(event.data);document.getElementById('rand1').innerHTML = obj.rand1;document.getElementById('rand2').innerHTML = obj.rand2; console.log(obj.rand1);console.log(obj.rand2); } window.onload = function(event) { init(); }</script></html>";
 
 // The JSON library uses static memory, so this will need to be allocated:
-StaticJsonDocument<200> doc_tx;                       // provision memory for about 200 characters
-StaticJsonDocument<200> doc_rx;
+// -> in the video I used global variables for "doc_tx" and "doc_rx", however, I now changed this in the code to local variables instead "doc" -> Arduino documentation recomends to use local containers instead of global to prevent data corruption
 
 // We want to periodically send values to the clients, so we need to define an "interval" and remember the last time we sent data to the client (with "previousMillis")
 int interval = 1000;                                  // send data to the client every 1000ms -> 1s
@@ -55,9 +54,7 @@ void setup() {
   Serial.println(WiFi.localIP());                     // show IP address that the ESP32 has received from router
   
   server.on("/", []() {                               // define here wat the webserver needs to do
-    server.send(200, "text\html", webpage);           //    -> it needs to send out the HTML string "webpage" to the client
-    // NOTE: if you use Edge or IE, then use:
-    // server.send(200, "text/html", webpage);
+    server.send(200, "text/html", webpage);           //    -> it needs to send out the HTML string "webpage" to the client
   });
   server.begin();                                     // start server
   
@@ -73,10 +70,11 @@ void loop() {
   if ((unsigned long)(now - previousMillis) > interval) { // check if "interval" ms has passed since last time the clients were updated
     
     String jsonString = "";                           // create a JSON string for sending data to the client
-    JsonObject object = doc_tx.to<JsonObject>();      // create a JSON Object
+    StaticJsonDocument<200> doc;                      // create a JSON container
+    JsonObject object = doc.to<JsonObject>();         // create a JSON Object
     object["rand1"] = random(100);                    // write data into the JSON object -> I used "rand1" and "rand2" here, but you can use anything else
     object["rand2"] = random(100);
-    serializeJson(doc_tx, jsonString);                // convert JSON object to string
+    serializeJson(doc, jsonString);                   // convert JSON object to string
     Serial.println(jsonString);                       // print JSON string to console for debug purposes (you can comment this out)
     webSocket.broadcastTXT(jsonString);               // send JSON string to clients
     
@@ -95,7 +93,8 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
       break;
     case WStype_TEXT:                                 // if a client has sent data, then type == WStype_TEXT
       // try to decipher the JSON string received
-      DeserializationError error = deserializeJson(doc_rx, payload);
+      StaticJsonDocument<200> doc;                    // create a JSON container
+      DeserializationError error = deserializeJson(doc, payload);
       if (error) {
         Serial.print(F("deserializeJson() failed: "));
         Serial.println(error.f_str());
@@ -103,10 +102,10 @@ void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
       }
       else {
         // JSON string was received correctly, so information can be retrieved:
-        const char* g_brand = doc_rx["brand"];
-        const char* g_type = doc_rx["type"];
-        const int g_year = doc_rx["year"];
-        const char* g_color = doc_rx["color"];
+        const char* g_brand = doc["brand"];
+        const char* g_type = doc["type"];
+        const int g_year = doc["year"];
+        const char* g_color = doc["color"];
         Serial.println("Received guitar info from user: " + String(num));
         Serial.println("Brand: " + String(g_brand));
         Serial.println("Type: " + String(g_type));
