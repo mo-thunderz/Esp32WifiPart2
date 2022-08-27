@@ -11,12 +11,12 @@
 //
 // Refer to https://youtu.be/15X0WvGaVg8
 //
-// Written by mo thunderz (last update: 11.09.2021)
+// Written by mo thunderz (last update: 27.08.2022)
 //
 // ---------------------------------------------------------------------------------------
 
 #include <WiFi.h>                                     // needed to connect to WiFi
-#include <WebServer.h>                                // needed to create a simple webserver
+#include <WebServer.h>                                // needed to create a simple webserver (make sure tools -> board is set to ESP32, otherwise you will get a "WebServer.h: No such file or directory" error)
 #include <WebSocketsServer.h>                         // needed for instant communication between client and server through Websockets
 
 // SSID and password of Wifi connection:
@@ -48,9 +48,7 @@ void setup() {
   Serial.println(WiFi.localIP());                     // show IP address that the ESP32 has received from router
   
   server.on("/", []() {                               // define here wat the webserver needs to do
-    server.send(200, "text\html", website);           //    -> it needs to send out the HTML string "webpage" to the client
-    // NOTE: if you use Edge or IE, then use:
-    // server.send(200, "text/html", webpage);
+    server.send(200, "text/html", website);           //    -> it needs to send out the HTML string "webpage" to the client
   });
   server.begin();                                     // start server
   
